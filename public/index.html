@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <div id="join">
+            <select id="rooms">
+                <option value="general">General</option>
+                <option value="sandbox">Sandbox</option>
+            </select>
+            <button id="joinBtn">Join</button>
+        </div>
+        <div id="main">
+            <h1 id="roomName">Room: </h1>
+            <form>
+                <input id="username" placeholder="username" />
+                <input id="message" placeholder="message" />
+                <button type="submit">Send</button>
+            </form>
+            <ul id="messages">
+    
+            </ul>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        
+        const msgList = document.getElementById('messages');
+        const form = document.querySelector('form');
+        const usrnmeInput = document.getElementById('username');
+        const msgInput = document.getElementById('message');
+        const joinBtn = document.getElementById('joinBtn');
+        const rooms = document.getElementById('rooms');
+        const mainDiv = document.getElementById('main');
+        const joinDiv = document.getElementById('join');
+        const roomTitle = document.getElementById('roomName');
+
+        mainDiv.hidden = true;
+
+        joinBtn.addEventListener('click', event => {
+            event.preventDefault();
+
+            socket.emit('join', rooms.value);
+            joinDiv.hidden = true;
+            mainDiv.hidden = false;
+            roomTitle.innerHTML += rooms.value;
+        });
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+
+            socket.emit('chatMessage', { username: usrnmeInput.value, message: msgInput.value });
+            
+            msgInput.value = '';
+        });
+
+        socket.on('chatMessage', message => {
+            const li = document.createElement('li');
+            li.innerHTML = `${message.username}: ${message.message}`;
+            msgList.appendChild(li);
+        });
+    </script>
+</body>
+</html>
